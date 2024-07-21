@@ -1,0 +1,37 @@
+name: redis-docker-compose
+
+services:
+  redis:
+    container_name: redis
+    image: redis:alpine    
+    environment:
+      - REDIS_PASSWORD=${REDIS_DB_PASSWORD}
+      - REDIS_PORT=${REDIS_DB_PORT}
+      - REDIS_DATABASES=${REDIS_DATABASES}
+    volumes:
+      - ${REDIS_HOST_DATA}/dаta:/root/redis
+      - ${REDIS_HOST_DATA}/redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:${REDIS_DB_PORT}"
+    networks:
+      - development-network
+    
+
+  redis-commander:
+    container_name: redis-commander
+    image: rediscommander/redis-commander:latest    
+    environment:
+      - REDIS_HOSTS=local:redis:${REDIS_DB_PORT}
+      - HTTP_USER=${REDIS_DB_USER}
+      - HTTP_PASSWORD=${REDIS_DB_PASSWORD}
+    ports:
+      - 8081:8081
+    depends_on:
+      - redis
+    networks:
+      - development-network
+
+networks:
+  development-network:
+    name: development-network
+    driver: bridge
